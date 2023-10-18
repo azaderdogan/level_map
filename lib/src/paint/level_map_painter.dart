@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:level_map/level_map.dart';
 import 'package:level_map/src/model/bg_image.dart';
 import 'package:level_map/src/model/image_details.dart';
 import 'package:level_map/src/model/images_to_paint.dart';
@@ -148,13 +149,15 @@ class LevelMapPainter extends CustomPainter {
       final int _flooredCurrentLevel = params.currentLevel.floor();
       if (_flooredCurrentLevel == thisLevel && _nextLevelFraction <= 0.5) {
         _curveFraction = 0.5 + _nextLevelFraction;
-        // _paintImage(canvas, imagesToPaint!.currentLevelImage, _offsetToPaintImage.toCenter(imageDetails.size));
+        _paintImage(canvas, imagesToPaint!.currentLevelImage,
+            _offsetToPaintImage.toCenter(imageDetails.size));
       } else if (_flooredCurrentLevel == thisLevel - 1 &&
           _nextLevelFraction > 0.5) {
         _curveFraction = _nextLevelFraction - 0.5;
       } else {
         return;
       }
+
       final Offset _offsetToPaintCurrentLevelImage = Offset(
           _compute(_curveFraction, p1.dx, p2.dx, p3.dx),
           _compute(_curveFraction, p1.dy, p2.dy, p3.dy));

@@ -26,8 +26,11 @@ class _LevelMapPageState extends State<LevelMapPage> {
       child: Scaffold(
         body: LevelMap(
           backgroundColor: Colors.limeAccent,
+          onTapLevel: (value) {
+            print(value);
+          },
           levelMapParams: LevelMapParams(
-            levelCount: 4,
+            levelCount: 10,
             currentLevel: 2.5,
             pathColor: Colors.black,
             currentLevelImage: ImageParams(
