@@ -11,12 +11,13 @@ class LevelMapPainter extends CustomPainter {
   final ImagesToPaint? imagesToPaint;
   final Paint _pathPaint;
   final Paint _shadowPaint;
+  List<Offset>? offsets;
 
   /// Describes the fraction to reach next level.
   /// If the [LevelMapParams.currentLevel] is 6.5, [_nextLevelFraction] is 0.5.
   final double _nextLevelFraction;
 
-  LevelMapPainter({required this.params, this.imagesToPaint})
+  LevelMapPainter({required this.params, this.imagesToPaint, this.offsets})
       : _pathPaint = Paint()
           ..strokeWidth = params.pathStrokeWidth
           ..color = params.pathColor
@@ -30,6 +31,7 @@ class LevelMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    offsets?.clear();
     canvas.save();
     canvas.translate(0, size.height);
 
@@ -69,7 +71,7 @@ class LevelMapPainter extends CustomPainter {
     if (_bgImages != null) {
       _bgImages.forEach((bgImage) {
         bgImage.offsetsToBePainted.forEach((offset) {
-          _paintImage(canvas, bgImage.imageDetails, offset);
+          _paintImage(canvas, bgImage.imageDetails, offset, false);
         });
       });
     }
@@ -80,7 +82,7 @@ class LevelMapPainter extends CustomPainter {
       final ImageDetails _startLevelImage = imagesToPaint!.startLevelImage!;
       final Offset _offset =
           Offset(canvasWidth / 2, 0).toBottomCenter(_startLevelImage.size);
-      _paintImage(canvas, _startLevelImage, _offset);
+      _paintImage(canvas, _startLevelImage, _offset, false);
     }
   }
 
@@ -90,7 +92,7 @@ class LevelMapPainter extends CustomPainter {
       final ImageDetails _pathEndImage = imagesToPaint!.pathEndImage!;
       final Offset _offset = Offset(canvasWidth / 2, -canvasHeight)
           .toTopCenter(_pathEndImage.size.width);
-      _paintImage(canvas, _pathEndImage, _offset);
+      _paintImage(canvas, _pathEndImage, _offset, false);
     }
   }
 
@@ -144,13 +146,13 @@ class LevelMapPainter extends CustomPainter {
         imageDetails = imagesToPaint!.lockedLevelImage;
       }
       _paintImage(canvas, imageDetails,
-          _offsetToPaintImage.toBottomCenter(imageDetails.size));
+          _offsetToPaintImage.toBottomCenter(imageDetails.size), true);
       final double _curveFraction;
       final int _flooredCurrentLevel = params.currentLevel.floor();
       if (_flooredCurrentLevel == thisLevel && _nextLevelFraction <= 0.5) {
         _curveFraction = 0.5 + _nextLevelFraction;
         _paintImage(canvas, imagesToPaint!.currentLevelImage,
-            _offsetToPaintImage.toCenter(imageDetails.size));
+            _offsetToPaintImage.toCenter(imageDetails.size), false);
       } else if (_flooredCurrentLevel == thisLevel - 1 &&
           _nextLevelFraction > 0.5) {
         _curveFraction = _nextLevelFraction - 0.5;
@@ -161,17 +163,20 @@ class LevelMapPainter extends CustomPainter {
       final Offset _offsetToPaintCurrentLevelImage = Offset(
           _compute(_curveFraction, p1.dx, p2.dx, p3.dx),
           _compute(_curveFraction, p1.dy, p2.dy, p3.dy));
-      _paintImage(canvas, imagesToPaint!.currentLevelImage,
-          _offsetToPaintCurrentLevelImage.toBottomCenter(imageDetails.size));
+      _paintImage(
+          canvas,
+          imagesToPaint!.currentLevelImage,
+          _offsetToPaintCurrentLevelImage.toBottomCenter(imageDetails.size),
+          false);
     }
   }
 
-  void _paintImage(Canvas canvas, ImageDetails imageDetails, Offset offset) {
-    paintImage(
-        canvas: canvas,
-        rect: Rect.fromLTWH(offset.dx, offset.dy, imageDetails.size.width,
-            imageDetails.size.height),
-        image: imageDetails.imageInfo.image);
+  void _paintImage(
+      Canvas canvas, ImageDetails imageDetails, Offset offset, bool addOffset) {
+    var rect = Rect.fromLTWH(offset.dx, offset.dy, imageDetails.size.width,
+        imageDetails.size.height);
+    if (addOffset) offsets?.add(rect.center);
+    paintImage(canvas: canvas, rect: rect, image: imageDetails.imageInfo.image);
   }
 
   double _compute(double t, double p1, double p2, double p3) {

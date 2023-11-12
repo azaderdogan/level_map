@@ -1,25 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:level_map/src/model/images_to_paint.dart';
 import 'package:level_map/src/model/level_map_params.dart';
+import 'package:level_map/src/paint/custom_info_window.dart';
 import 'package:level_map/src/paint/level_map_painter.dart';
 import 'package:level_map/src/utils/load_ui_image_to_draw.dart';
 import 'package:level_map/src/utils/scroll_behaviour.dart';
 
-typedef OnTapLevel = void Function(int level);
+typedef OnTapLevel = void Function(int level, Offset offset);
+typedef WidgetBuilder = Widget Function(BuildContext context, int level);
 
 class LevelMap extends StatelessWidget {
   final LevelMapParams levelMapParams;
   final Color backgroundColor;
   final OnTapLevel? onTapLevel;
+  final CustomInfoWindowController customInfoWindowController =
+      CustomInfoWindowController();
+  final WidgetBuilder previewBuilder;
+  final double? previewHeight;
+  final List<Offset> offsetList = [];
+  final Offset previewOffset;
 
   /// If set to false, scroll starts from the bottom end (level 1).
   final bool scrollToCurrentLevel;
-  const LevelMap({
+  LevelMap({
     Key? key,
     required this.levelMapParams,
     this.onTapLevel,
     this.backgroundColor = Colors.transparent,
     this.scrollToCurrentLevel = true,
+    this.previewOffset = const Offset(0, 0),
+    required this.previewBuilder,
+    this.previewHeight,
   }) : super(key: key);
 
   @override
@@ -47,23 +58,41 @@ class LevelMap extends StatelessWidget {
                 constraints.maxWidth,
               ),
               builder: (context, snapshot) {
-                return GestureDetector(
-                  onTapUp: (details) {
-                    if (onTapLevel != null) {
-                      final int _levelTapped = (details.localPosition.dy /
-                              levelMapParams.levelHeight)
-                          .floor();
-                      onTapLevel!(_levelTapped + 1);
-                    }
-                  },
-                  child: CustomPaint(
-                    size: Size(constraints.maxWidth,
-                        levelMapParams.levelCount * levelMapParams.levelHeight),
-                    painter: LevelMapPainter(
-                      params: levelMapParams,
-                      imagesToPaint: snapshot.data,
+                return Stack(
+                  children: [
+                    GestureDetector(
+                      onTapUp: (details) {
+                        final int _levelTapped = (details.localPosition.dy /
+                                levelMapParams.levelHeight)
+                            .floor();
+                        onTapLevel?.call(
+                            _levelTapped + 1, details.localPosition);
+                        if (offsetList.length >= (_levelTapped + 1)) {
+                          var offset = offsetList[_levelTapped];
+                          customInfoWindowController.addInfoWindow!(
+                              previewBuilder(context, _levelTapped),
+                              Offset(offset.dx, -offset.dy));
+                        }
+                      },
+                      child: CustomPaint(
+                        size: Size(
+                            constraints.maxWidth,
+                            levelMapParams.levelCount *
+                                levelMapParams.levelHeight),
+                        painter: LevelMapPainter(
+                          params: levelMapParams,
+                          imagesToPaint: snapshot.data,
+                          offsets: offsetList,
+                        ),
+                      ),
                     ),
-                  ),
+                    CustomInfoWindow(
+                      controller: customInfoWindowController,
+                      height: previewHeight,
+                      offset: previewOffset,
+                      rightSide: levelMapParams.levelCount.isEven,
+                    ),
+                  ],
                 );
               },
             ),
