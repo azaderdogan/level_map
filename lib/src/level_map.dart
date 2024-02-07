@@ -61,6 +61,7 @@ class LevelMap extends StatelessWidget {
                 return Stack(
                   children: [
                     GestureDetector(
+                      behavior: HitTestBehavior.translucent,
                       onTapUp: (details) {
                         final int _levelTapped = (details.localPosition.dy /
                                 levelMapParams.levelHeight)
