@@ -51,8 +51,8 @@ class _LevelMapPageState extends State<LevelMapPage> {
             ),
           ),
           levelMapParams: LevelMapParams(
-            levelCount: 16,
-            currentLevel: 8,
+            levelCount: 1,
+            currentLevel: 1,
             maxVariationFactor: 1,
             minReferencePositionOffsetFactor: Offset(0.5, 0.5),
             maxReferencePositionOffsetFactor: Offset(0.8, 0.8),

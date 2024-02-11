@@ -151,8 +151,6 @@ class LevelMapPainter extends CustomPainter {
       final int _flooredCurrentLevel = params.currentLevel.floor();
       if (_flooredCurrentLevel == thisLevel && _nextLevelFraction <= 0.5) {
         _curveFraction = 0.5 + _nextLevelFraction;
-        _paintImage(canvas, imagesToPaint!.currentLevelImage,
-            _offsetToPaintImage.toCenter(imageDetails.size), false);
       } else if (_flooredCurrentLevel == thisLevel - 1 &&
           _nextLevelFraction > 0.5) {
         _curveFraction = _nextLevelFraction - 0.5;
