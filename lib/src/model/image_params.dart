@@ -5,6 +5,7 @@ import 'package:level_map/level_map.dart';
 class ImageParams {
   final String path;
   final Size size;
+  final bool isNetworkImage;
 
   /// It determines how close the image could get to the center of the page.
   /// Affects only for BG images.
@@ -31,6 +32,7 @@ class ImageParams {
     required this.size,
     this.imagePositionFactor = 0.4,
     this.repeatCountPerLevel = 0.5,
+    this.isNetworkImage = false,
     this.side = Side.BOTH,
   })  : assert(imagePositionFactor >= 0 && imagePositionFactor <= 1,
             "Image Position factor should be between 0 and 1"),
