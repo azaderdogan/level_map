@@ -105,13 +105,22 @@ List<ui.Offset> _getImageOffsets(ImageParams imageParams, int levelCount,
 
 Future<ImageInfo> _getUiImage(ImageParams imageParams) async {
   Completer<ImageInfo> completer = Completer();
-  //TODO: Add network image functionality also.
-  final AssetImage image = new AssetImage(imageParams.path);
-  image
-      .resolve(ImageConfiguration())
-      .addListener(ImageStreamListener((ImageInfo info, bool _) {
-    completer.complete(info);
-  }));
+  if (imageParams.isNetworkImage) {
+    final NetworkImage image = new NetworkImage(imageParams.path);
+    image
+        .resolve(ImageConfiguration())
+        .addListener(ImageStreamListener((ImageInfo info, bool _) {
+      completer.complete(info);
+    }));
+  } else {
+    final AssetImage image = new AssetImage(imageParams.path);
+    image
+        .resolve(ImageConfiguration())
+        .addListener(ImageStreamListener((ImageInfo info, bool _) {
+      completer.complete(info);
+    }));
+  }
+
   ImageInfo imageInfo = await completer.future;
   return imageInfo;
 }
